@@ -104,4 +104,4 @@ def example_transform(df):
 
     log_output("transform data", df.limit(10).toPandas().to_markdown())
 
-    return df  # Ensure the transformed DataFrame is returned
+    return df
