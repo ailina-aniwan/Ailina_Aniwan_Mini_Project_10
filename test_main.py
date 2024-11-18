@@ -47,7 +47,13 @@ def test_describe(spark):
 def test_query(spark):
     """Test the query function"""
     df = load_data(spark)
-    query_string = "SELECT * FROM StudentLifestyle WHERE GPA > 3.5"
+    df = example_transform(df)  # Ensure transformations are applied before querying
+    query_string = """
+        SELECT Stress_Level, AVG(GPA_Rounded) AS Avg_Rounded_GPA
+        FROM StudentLifestyle
+        GROUP BY Stress_Level
+        ORDER BY Avg_Rounded_GPA DESC
+    """
     result = query(spark, df, query_string, "StudentLifestyle")
     assert result is None, "Query function should return None (only logs output)."
 
@@ -55,8 +61,10 @@ def test_query(spark):
 def test_example_transform(spark):
     """Test the example_transform function"""
     df = load_data(spark)
-    result = example_transform(df)
-    assert result is None, "Transform function should return None (only logs output)."
+    transformed_df = example_transform(df)
+    assert transformed_df is not None, "Transform function returned None."
+    assert "Lifestyle_Category" in transformed_df.columns, "Lifestyle_Category column is missing."
+    assert "GPA_Rounded" in transformed_df.columns, "GPA_Rounded column is missing."
 
 
 if __name__ == "__main__":
@@ -69,6 +77,11 @@ if __name__ == "__main__":
         assert df is not None, "Load data returned None."
         assert df.count() > 0, "Loaded DataFrame is empty."
         describe(df)
-        query_string = "SELECT * FROM StudentLifestyle WHERE GPA > 3.5"
+        df = example_transform(df)
+        query_string = """
+            SELECT Stress_Level, AVG(GPA_Rounded) AS Avg_Rounded_GPA
+            FROM StudentLifestyle
+            GROUP BY Stress_Level
+            ORDER BY Avg_Rounded_GPA DESC
+        """
         query(spark, df, query_string, "StudentLifestyle")
-        example_transform(df)

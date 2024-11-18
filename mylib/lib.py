@@ -6,7 +6,6 @@ import os
 import requests
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import when, col, round
-
 from pyspark.sql.types import (
     StructType,
     StructField,
@@ -83,6 +82,7 @@ def query(spark, df, query, name):
 
 
 def describe(df):
+    """Generate summary statistics"""
     summary_stats_str = df.describe().toPandas().to_markdown()
     log_output("describe data", summary_stats_str)
 
@@ -100,4 +100,4 @@ def example_transform(df):
 
     log_output("transform data", df.limit(10).toPandas().to_markdown())
 
-    return df.show()
+    return df  # Ensure the transformed DataFrame is returned
