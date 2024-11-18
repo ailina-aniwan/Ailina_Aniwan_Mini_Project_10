@@ -53,7 +53,11 @@ def extract(
     return file_path
 
 
-def load_data(spark, data="data/student_lifestyle_dataset.csv", name="StudentLifestyle"):
+def load_data(
+    spark, 
+    data="data/student_lifestyle_dataset.csv", 
+    name="StudentLifestyle"
+):
     """Load data with a predefined schema"""
     schema = StructType([
         StructField("Student_ID", IntegerType(), True),

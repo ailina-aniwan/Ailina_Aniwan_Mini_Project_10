@@ -17,10 +17,9 @@ from mylib.lib import (
 
 @pytest.fixture(scope="module")
 def spark():
-    """Fixture to manage Spark session setup and teardown"""
-    spark = start_spark("TestApp")
-    yield spark
-    end_spark(spark)
+    spark_session = start_spark("TestApp")
+    yield spark_session
+    end_spark(spark_session)
 
 
 def test_extract():
@@ -47,7 +46,7 @@ def test_describe(spark):
 def test_query(spark):
     """Test the query function"""
     df = load_data(spark)
-    df = example_transform(df)  # Ensure transformations are applied before querying
+    df = example_transform(df)
     query_string = """
         SELECT Stress_Level, AVG(GPA_Rounded) AS Avg_Rounded_GPA
         FROM StudentLifestyle
@@ -63,25 +62,19 @@ def test_example_transform(spark):
     df = load_data(spark)
     transformed_df = example_transform(df)
     assert transformed_df is not None, "Transform function returned None."
-    assert "Lifestyle_Category" in transformed_df.columns, "Lifestyle_Category column is missing."
+    assert (
+        "Lifestyle_Category" in transformed_df.columns
+    ), "Lifestyle_Category column is missing."
     assert "GPA_Rounded" in transformed_df.columns, "GPA_Rounded column is missing."
 
 
 if __name__ == "__main__":
-    # Run tests manually
     file_path = extract()
     assert os.path.exists(file_path), "Extract function did not create the file."
 
-    with start_spark("TestApp") as spark:
-        df = load_data(spark)
-        assert df is not None, "Load data returned None."
-        assert df.count() > 0, "Loaded DataFrame is empty."
-        describe(df)
-        df = example_transform(df)
-        query_string = """
-            SELECT Stress_Level, AVG(GPA_Rounded) AS Avg_Rounded_GPA
-            FROM StudentLifestyle
-            GROUP BY Stress_Level
-            ORDER BY Avg_Rounded_GPA DESC
-        """
-        query(spark, df, query_string, "StudentLifestyle")
+    spark_session = start_spark("TestApp")
+    df = load_data(spark_session)
+    assert df is not None, "Load data returned None."
+    assert df.count() > 0, "Loaded DataFrame is empty."
+    describe(df)
+    df
